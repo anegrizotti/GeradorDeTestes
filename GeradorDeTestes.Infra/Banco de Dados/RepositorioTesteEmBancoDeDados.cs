@@ -88,8 +88,13 @@ namespace GeradorDeTestes.Infra.Banco_de_Dados
                         T.MATERIA_NUMERO = M.NUMERO";
 
         private const string sqlSelecionarQuestoes =
-            @"";
+            @"SELECT
+                    [NUMERO],
+		            [ENUNCIADO],
+		            [RESPOSTA]
 
+                FROM TBQUESTAO
+                ";
 
         public ValidationResult Editar(Teste teste)
         {
@@ -177,6 +182,8 @@ namespace GeradorDeTestes.Infra.Banco_de_Dados
 
             conexaoComBanco.Close();
 
+            CarregarQuestoes(teste);
+
             return teste;
         }
 
@@ -206,6 +213,21 @@ namespace GeradorDeTestes.Infra.Banco_de_Dados
         private void CarregarQuestoes(Teste teste)
         {
             SqlConnection conexaoComBanco = new SqlConnection(enderecoBanco);
+
+            SqlCommand comandoSelecao = new SqlCommand(sqlSelecionarQuestoes, conexaoComBanco);
+
+            comandoSelecao.Parameters.AddWithValue("QUESTAO_NUMERO", teste.Numero);
+
+            conexaoComBanco.Open();
+            SqlDataReader leitorQuestoesTeste = comandoSelecao.ExecuteReader();
+
+
+            while (leitorQuestoesTeste.Read())
+            {
+                Questao questao = ConverterParaQuestao(leitorQuestoesTeste);
+
+                teste.AdicionarQuestao(questao);
+            }
 
             conexaoComBanco.Close();
         }

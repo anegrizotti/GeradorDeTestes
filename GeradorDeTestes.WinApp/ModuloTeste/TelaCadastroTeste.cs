@@ -157,7 +157,7 @@ namespace GeradorDeTestes.WinApp.ModuloTeste
         private decimal ObtemQuantidadeMaxima()
         {
             Materia m = (Materia)comboBoxMateria.SelectedItem;
-            List<Questao> questoesMateriaSelecionada = repositorioQuestao.SelecionarTodos().Where(x => x.Materia.Equals(m)).ToList();
+            List<Questao> questoesMateriaSelecionada = repositorioQuestao.SelecionarTodos().Where(x => x.Materia.Nome.Equals(m.Nome)).ToList();
             return questoesMateriaSelecionada.Count;
         }
 

@@ -47,6 +47,11 @@ namespace GeradorDeTestes.Dominio.ModuloTeste
             dataCriacao = DateTime.Now;
         }
 
+        public void AdicionarQuestao(Questao questao)
+        {
+            questoes.Add(questao);
+        }
+
         public object Clone()
         {
             return new Teste(this);

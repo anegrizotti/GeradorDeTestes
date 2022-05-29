@@ -268,12 +268,43 @@ namespace GeradorDeTestes.Infra.Banco_de_Dados
 
         public List<Questao> Sortear(Materia materia, int qtd)
         {
-            throw new NotImplementedException();
+            int limite = 0;
+            List<Questao> questoesSorteadas = new List<Questao>();
+            List<Questao> questoesMateriaSelecionada = SelecionarTodos().Where(x => x.Materia.Nome.Equals(materia.Nome)).ToList();
+
+            Random rdm = new Random();
+            List<Questao> questoes = questoesMateriaSelecionada.OrderBy(item => rdm.Next()).ToList();
+
+            foreach (Questao q in questoes)
+            {
+                questoesSorteadas.Add(q);
+                limite++;
+                if (limite == qtd)
+                    break;
+            }
+
+
+            return questoesSorteadas;
         }
 
         public List<Questao> SortearQuestoesRecuperacao(Disciplina disciplina, int qtd)
         {
-            throw new NotImplementedException();
+            int limite = 0;
+            List<Questao> questoesSorteadas = new List<Questao>();
+            List<Questao> questoesDisciplinaSelecionada = SelecionarTodos().Where(x => x.Disciplina.Nome.Equals(disciplina.Nome)).ToList();
+
+            Random rdm = new Random();
+            List<Questao> questoes = questoesDisciplinaSelecionada.OrderBy(item => rdm.Next()).ToList();
+
+            foreach (Questao q in questoes)
+            {
+                questoesSorteadas.Add(q);
+                limite++;
+                if (limite == qtd)
+                    break;
+            }
+
+            return questoesSorteadas;
         }
 
         #region Métodos privados
