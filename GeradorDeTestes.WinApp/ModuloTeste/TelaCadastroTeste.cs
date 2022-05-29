@@ -103,7 +103,7 @@ namespace GeradorDeTestes.WinApp.ModuloTeste
             List<Materia> materias = repositorioMateria.SelecionarTodos();
             foreach (Materia m in materias)
             {
-                if (m.Disciplina == comboBoxDisciplina.SelectedItem)
+                if (m.Disciplina.Nome == ((Disciplina)comboBoxDisciplina.SelectedItem).Nome)
                 {
                     comboBoxMateria.Items.Add(m);
                 }

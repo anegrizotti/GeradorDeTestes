@@ -44,7 +44,7 @@ namespace GeradorDeTestes.WinApp
             var repositorioDisciplina = new RepositorioDisciplinaEmBancoDeDados();
             var repositorioMateria = new RepositorioMateriaEmBancoDeDados();
             var repositorioQuestao = new RepositorioQuestaoEmBancoDeDados();
-            var repositorioTeste = new RepositorioTesteEmArquivo(dataContext);
+            var repositorioTeste = new RepositorioTesteEmBancoDeDados();
             controladores = new Dictionary<string, ControladorBase>();
             controladores.Add("Disciplinas", new ControladorDisciplina(repositorioDisciplina, repositorioMateria));
             controladores.Add("Matérias", new ControladorMateria(repositorioMateria, repositorioDisciplina));

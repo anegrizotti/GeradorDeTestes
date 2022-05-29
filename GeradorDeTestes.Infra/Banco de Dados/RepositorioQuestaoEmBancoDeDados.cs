@@ -123,10 +123,7 @@ namespace GeradorDeTestes.Infra.Banco_de_Dados
                     [QUESTAO_NUMERO] = @QUESTAO_NUMERO
                 ";
 
-        public Disciplina Disciplina { get; private set; }
-
         #endregion
-
 
         public void AdicionarAlternativas(Questao questaoSelecionada, List<Alternativa> alternativas)
         {
@@ -304,8 +301,6 @@ namespace GeradorDeTestes.Infra.Banco_de_Dados
             var resposta = Convert.ToChar(leitorQuestao["RESPOSTA"]);
             var numeroMateria = Convert.ToInt32(leitorQuestao["MATERIA_NUMERO"]);
             var numeroDisciplina = Convert.ToInt32(leitorQuestao["DISCIPLINA_NUMERO"]);
-            //var nomeMateria = Convert.ToString(leitorQuestao["MATERIA_NOME"]);
-            //var nomeDisciplina = Convert.ToString(leitorQuestao["DISCIPLINA_NOME"]);
 
             var questao = new Questao
             {
@@ -344,14 +339,12 @@ namespace GeradorDeTestes.Infra.Banco_de_Dados
             conexaoComBanco.Open();
             SqlDataReader leitorAlternativasQuestao = comandoSelecao.ExecuteReader();
 
-            //List<ItemTarefa> itensTarefa = new List<ItemTarefa>();
 
             while (leitorAlternativasQuestao.Read())
             {
                 Alternativa alternativa = ConverterParaAlternativa(leitorAlternativasQuestao);
 
                 questao.AdicionarAlternativa(alternativa);
-                //itensTarefa.Add(itemTarefa);
             }
 
             conexaoComBanco.Close();
