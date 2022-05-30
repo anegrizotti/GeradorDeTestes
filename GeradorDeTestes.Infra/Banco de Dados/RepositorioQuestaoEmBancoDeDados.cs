@@ -54,9 +54,15 @@ namespace GeradorDeTestes.Infra.Banco_de_Dados
 			        [NUMERO] = @NUMERO";
 
         private const string sqlExcluir =
-           @"DELETE FROM [TBQUESTAO]
-		        WHERE
-			        [NUMERO] = @NUMERO";
+            @"DELETE FROM [TBALTERNATIVA]
+                WHERE
+                    [QUESTAO_NUMERO] = @NUMERO;
+              DELETE FROM [TBTESTE_QUESTAO]
+                WHERE
+                    [QUESTAO_NUMERO] = @NUMERO;
+              DELETE FROM [TBQUESTAO]
+                WHERE
+                    [NUMERO] = @NUMERO";
 
         private const string sqlSelecionarPorNumero =
            @"SELECT

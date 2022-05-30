@@ -51,9 +51,12 @@ namespace GeradorDeTestes.Infra.Banco_de_Dados
 			        [NUMERO] = @NUMERO";
 
         private const string sqlExcluir =
-            @"DELETE FROM [TBTESTE]
-		        WHERE
-			        [NUMERO] = @NUMERO";
+            @"DELETE FROM [TBTESTE_QUESTAO]
+                WHERE
+                    [TESTE_NUMERO] = @NUMERO;
+              DELETE FROM [TBTESTE]
+                WHERE
+                    [NUMERO] = @NUMERO";
 
         private const string sqlSelecionarPorNumero =
             @"SELECT
@@ -87,32 +90,63 @@ namespace GeradorDeTestes.Infra.Banco_de_Dados
                         INNER JOIN TBMATERIA AS M ON
                         T.MATERIA_NUMERO = M.NUMERO";
 
-        private const string sqlSelecionarQuestoes =
+        private const string sqlSelecionarQuestoesTeste =
             @"SELECT
-                    [NUMERO],
-		            [ENUNCIADO],
-		            [RESPOSTA]
+                    Q.NUMERO,
+                    Q.ENUNCIADO,
+                    Q.RESPOSTA,
+                    Q.MATERIA_NUMERO,
+                    Q.DISCIPLINA_NUMERO
 
-                FROM TBQUESTAO
-                ";
+            FROM 
+                TBQUESTAO AS Q INNER JOIN TBTESTE_QUESTAO AS TQ
+                ON Q.NUMERO = TQ.QUESTAO_NUMERO
+            
+            WHERE 
+                TQ.TESTE_NUMERO = TESTE_NUMERO";
 
-        public ValidationResult Editar(Teste teste)
+        private const string sqlAdicionarQuestaoTeste =
+            @"INSERT INTO [TBTESTE_QUESTAO] 
+                (
+                    [TESTE_NUMERO],
+                    [QUESTAO_NUMERO]
+	            )
+	            VALUES
+                (
+                    @TESTE_NUMERO,
+                    @QUESTAO_NUMERO
+                )";
+
+        private const string sqlRemoverQuestaoTeste =
+            @"DELETE FROM 
+                TBTESTE_QUESTAO
+            WHERE 
+	            [QUESTAO_NUMERO] = @QUESTAO_NUMERO";
+
+
+        public ValidationResult Inserir(Teste novoRegistro)
         {
             var validador = new ValidadorTeste();
 
-            var resultadoValidacao = validador.Validate(teste);
+            var resultadoValidacao = validador.Validate(novoRegistro);
 
             if (resultadoValidacao.IsValid == false)
                 return resultadoValidacao;
 
             SqlConnection conexaoComBanco = new SqlConnection(enderecoBanco);
 
-            SqlCommand comandoEdicao = new SqlCommand(sqlEditar, conexaoComBanco);
+            SqlCommand comandoInsercao = new SqlCommand(sqlInserir, conexaoComBanco);
 
-            ConfigurarParametrosTeste(teste, comandoEdicao);
+            ConfigurarParametrosTeste(novoRegistro, comandoInsercao);
 
             conexaoComBanco.Open();
-            comandoEdicao.ExecuteNonQuery();
+
+            var id = comandoInsercao.ExecuteScalar();
+
+            novoRegistro.Numero = Convert.ToInt32(id);
+
+            foreach (var questao in novoRegistro.Questoes)
+                AdicionarQuestao(novoRegistro, questao);
 
             conexaoComBanco.Close();
 
@@ -121,6 +155,11 @@ namespace GeradorDeTestes.Infra.Banco_de_Dados
 
         public ValidationResult Excluir(Teste teste)
         {
+            foreach (var questao in teste.Questoes)
+            {
+                RemoverQuestao(questao);
+            }
+
             SqlConnection conexaoComBanco = new SqlConnection(enderecoBanco);
 
             SqlCommand comandoExclusao = new SqlCommand(sqlExcluir, conexaoComBanco);
@@ -140,52 +179,6 @@ namespace GeradorDeTestes.Infra.Banco_de_Dados
             return resultadoValidacao;
         }
 
-        public ValidationResult Inserir(Teste novoTeste)
-        {
-            var validador = new ValidadorTeste();
-
-            var resultadoValidacao = validador.Validate(novoTeste);
-
-            if (resultadoValidacao.IsValid == false)
-                return resultadoValidacao;
-
-            SqlConnection conexaoComBanco = new SqlConnection(enderecoBanco);
-
-            SqlCommand comandoInsercao = new SqlCommand(sqlInserir, conexaoComBanco);
-
-            ConfigurarParametrosTeste(novoTeste, comandoInsercao);
-
-            conexaoComBanco.Open();
-            var id = comandoInsercao.ExecuteScalar();
-            novoTeste.Numero = Convert.ToInt32(id);
-
-            conexaoComBanco.Close();
-
-            return resultadoValidacao;
-        }
-
-        public Teste SelecionarPorNumero(int numero)
-        {
-            SqlConnection conexaoComBanco = new SqlConnection(enderecoBanco);
-
-            SqlCommand comandoSelecao = new SqlCommand(sqlSelecionarPorNumero, conexaoComBanco);
-
-            comandoSelecao.Parameters.AddWithValue("NUMERO", numero);
-
-            conexaoComBanco.Open();
-            SqlDataReader leitorTeste = comandoSelecao.ExecuteReader();
-
-            Teste teste = null;
-
-            if (leitorTeste.Read())
-                teste = ConverterParaTeste(leitorTeste);
-
-            conexaoComBanco.Close();
-
-            CarregarQuestoes(teste);
-
-            return teste;
-        }
 
         public List<Teste> SelecionarTodos()
         {
@@ -210,57 +203,76 @@ namespace GeradorDeTestes.Infra.Banco_de_Dados
             return testes;
         }
 
+        public Teste SelecionarPorNumero(int numero)
+        {
+            SqlConnection conexaoComBanco = new SqlConnection(enderecoBanco);
+
+            SqlCommand comandoSelecao = new SqlCommand(sqlSelecionarPorNumero, conexaoComBanco);
+
+            comandoSelecao.Parameters.AddWithValue("NUMERO", numero);
+
+            conexaoComBanco.Open();
+            SqlDataReader leitorTeste = comandoSelecao.ExecuteReader();
+
+            Teste teste = null;
+            if (leitorTeste.Read())
+                teste = ConverterParaTeste(leitorTeste);
+
+            conexaoComBanco.Close();
+
+            CarregarQuestoes(teste);
+
+            return teste;
+        }
+
+        private void RemoverQuestao(Questao questao)
+        {
+            SqlConnection conexaoComBanco = new SqlConnection(enderecoBanco);
+
+            SqlCommand comandoExclusao = new SqlCommand(sqlRemoverQuestaoTeste, conexaoComBanco);
+
+            comandoExclusao.Parameters.AddWithValue("QUESTAO_NUMERO", questao.Numero);
+
+            conexaoComBanco.Open();
+            int numeroRegistrosExcluidos = comandoExclusao.ExecuteNonQuery();
+            conexaoComBanco.Close();
+        }
+
+        private void AdicionarQuestao(Teste teste, Questao questao)
+        {
+            SqlConnection conexaoComBanco = new SqlConnection(enderecoBanco);
+
+            SqlCommand comandoInsercao = new SqlCommand(sqlAdicionarQuestaoTeste, conexaoComBanco);
+
+            comandoInsercao.Parameters.AddWithValue("TESTE_NUMERO", teste.Numero);
+            comandoInsercao.Parameters.AddWithValue("QUESTAO_NUMERO", questao.Numero);
+
+            conexaoComBanco.Open();
+            comandoInsercao.ExecuteScalar();
+            conexaoComBanco.Close();
+        }
+
         private void CarregarQuestoes(Teste teste)
         {
             SqlConnection conexaoComBanco = new SqlConnection(enderecoBanco);
 
-            SqlCommand comandoSelecao = new SqlCommand(sqlSelecionarQuestoes, conexaoComBanco);
+            SqlCommand comandoSelecao = new SqlCommand(sqlSelecionarQuestoesTeste, conexaoComBanco);
 
             comandoSelecao.Parameters.AddWithValue("QUESTAO_NUMERO", teste.Numero);
 
             conexaoComBanco.Open();
-            SqlDataReader leitorQuestoesTeste = comandoSelecao.ExecuteReader();
+            SqlDataReader leitorQuestao = comandoSelecao.ExecuteReader();
 
+            //List<Categoria> categorias = new List<Categoria>();
 
-            while (leitorQuestoesTeste.Read())
+            while (leitorQuestao.Read())
             {
-                Questao questao = ConverterParaQuestao(leitorQuestoesTeste);
+                var questao = ConverterParaQuestao(leitorQuestao);
 
-                teste.AdicionarQuestao(questao);
+                teste.Questoes.Add(questao);
             }
 
             conexaoComBanco.Close();
-        }
-
-        #region Métodos privados
-
-        private void ConfigurarParametrosTeste(Teste teste, SqlCommand comando)
-        {
-            comando.Parameters.AddWithValue("NUMERO", teste.Numero);
-            comando.Parameters.AddWithValue("TITULO", teste.Titulo);
-            comando.Parameters.AddWithValue("DATACRIACAO", teste.dataCriacao);
-            comando.Parameters.AddWithValue("MATERIA_NUMERO", teste.Materia.Numero);
-            comando.Parameters.AddWithValue("DISCIPLINA_NUMERO", teste.Disciplina.Numero);
-        }
-
-        private Teste ConverterParaTeste(SqlDataReader leitorTeste)
-        {
-            var numero = Convert.ToInt32(leitorTeste["NUMERO"]);
-            var titulo = Convert.ToString(leitorTeste["TITULO"]);
-            var dataCriacao = Convert.ToDateTime(leitorTeste["DATACRIACAO"]);
-            var numeroMateria = Convert.ToInt32(leitorTeste["MATERIA_NUMERO"]);
-            var numeroDisciplina = Convert.ToInt32(leitorTeste["DISCIPLINA_NUMERO"]);
-
-            var teste = new Teste
-            {
-                Numero = numero,
-                Titulo = titulo,
-                dataCriacao = dataCriacao,
-                Materia = repositorioMateria.SelecionarPorNumero(numeroMateria),
-                Disciplina = repositorioDisciplina.SelecionarPorNumero(numeroDisciplina)
-            };
-
-            return teste;
         }
 
         private Questao ConverterParaQuestao(SqlDataReader leitorQuestao)
@@ -283,6 +295,40 @@ namespace GeradorDeTestes.Infra.Banco_de_Dados
             return questao;
         }
 
-        #endregion
+        private Teste ConverterParaTeste(SqlDataReader leitorTeste)
+        {
+            var numero = Convert.ToInt32(leitorTeste["NUMERO"]);
+            var titulo = Convert.ToString(leitorTeste["TITULO"]);
+            var dataCriacao = Convert.ToDateTime(leitorTeste["DATACRIACAO"]);
+            var numeroMateria = Convert.ToInt32(leitorTeste["MATERIA_NUMERO"]);
+            var numeroDisciplina = Convert.ToInt32(leitorTeste["DISCIPLINA_NUMERO"]);
+
+            var teste = new Teste
+            {
+                Numero = numero,
+                Titulo = titulo,
+                dataCriacao = dataCriacao,
+                Materia = repositorioMateria.SelecionarPorNumero(numeroMateria),
+                Disciplina = repositorioDisciplina.SelecionarPorNumero(numeroDisciplina)
+            };
+
+            return teste;
+        }
+
+        private void ConfigurarParametrosTeste(Teste teste, SqlCommand comando)
+        {
+            comando.Parameters.AddWithValue("NUMERO", teste.Numero);
+            comando.Parameters.AddWithValue("TITULO", teste.Titulo);
+            comando.Parameters.AddWithValue("DATACRIACAO", teste.dataCriacao);
+            comando.Parameters.AddWithValue("MATERIA_NUMERO", teste.Materia.Numero);
+            comando.Parameters.AddWithValue("DISCIPLINA_NUMERO", teste.Disciplina.Numero);
+        }
+
+        public ValidationResult Editar(Teste registro)
+        {
+            throw new NotImplementedException();
+        }
     }
+
 }
+

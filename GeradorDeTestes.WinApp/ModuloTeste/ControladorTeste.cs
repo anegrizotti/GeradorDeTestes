@@ -36,7 +36,6 @@ namespace GeradorDeTestes.WinApp.ModuloTeste
             TelaCadastroTeste tela = new TelaCadastroTeste(repositorioDisciplina, repositorioMateria, repositorioQuestao);
             tela.Teste = new Teste();
             tela.GravarRegistro = repositorioTeste.Inserir;
-
             DialogResult resultado = tela.ShowDialog();
             if (resultado == DialogResult.OK)
                 CarregarTestes();

@@ -49,9 +49,12 @@ namespace GeradorDeTestes.Infra.BancoDeDados.ModuloMateria
 	            MT.DISCIPLINA_NUMERO = D.NUMERO";
 
         private const string sqlExcluir =
-            @"DELETE FROM [TBMateria]
-		        WHERE
-			        [NUMERO] = @NUMERO";
+            @"DELETE FROM [TBQUESTAO]
+                WHERE
+                    [MATERIA_NUMERO] = @NUMERO;
+              DELETE FROM [TBMATERIA]
+                WHERE
+                    [NUMERO] = @NUMERO";
 
         private const string sqlSelecionarPorNumero =
             @"SELECT 

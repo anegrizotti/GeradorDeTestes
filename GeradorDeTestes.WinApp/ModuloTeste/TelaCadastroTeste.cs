@@ -39,6 +39,8 @@ namespace GeradorDeTestes.WinApp.ModuloTeste
 
         }
 
+        //public Func<Teste, List<Questao>, ValidationResult> GravarRegistro { get; set; }
+
         public Func<Teste, ValidationResult> GravarRegistro { get; set; }
 
 
@@ -56,7 +58,7 @@ namespace GeradorDeTestes.WinApp.ModuloTeste
                     teste.Disciplina = (Disciplina)comboBoxDisciplina.SelectedItem;
                     teste.Questoes = QuestoesSorteadas;
 
-                    if(comboBoxMateria.SelectedItem == null) { 
+                    if (comboBoxMateria.SelectedItem == null) { 
                         Materia novaMateria = new Materia();
                         novaMateria.Nome = "Todas";
                         teste.Materia = novaMateria;
@@ -76,7 +78,6 @@ namespace GeradorDeTestes.WinApp.ModuloTeste
                     }
                 }
             }
-
         }
 
         public List<Questao> QuestoesSorteadas

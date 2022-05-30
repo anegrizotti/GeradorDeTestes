@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using GeradorDeTestes.Dominio.ModuloTeste;
 using GeradorDeTestes.Infra.Compartilhado;
+using GeradorDeTestes.Dominio.ModuloQuestao;
 
 namespace GeradorDeTestes.Infra.Arquivo
 {
@@ -71,5 +72,9 @@ namespace GeradorDeTestes.Infra.Arquivo
             return new ValidadorTeste();
         }
 
+        public ValidationResult InserirQuestoesNoTeste(Teste teste, List<Questao> questoesTeste)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

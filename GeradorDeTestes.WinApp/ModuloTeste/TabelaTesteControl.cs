@@ -40,7 +40,7 @@ namespace GeradorDeTestes.WinApp.ModuloTeste
             grid.Rows.Clear();
             foreach (Teste t in testes)
             {
-                grid.Rows.Add(t.Numero, t.Titulo, t.Disciplina, t.Materia, t.Questoes.Count, t.dataCriacao);
+                grid.Rows.Add(t.Numero, t.Titulo, t.Disciplina, t.Materia, t.dataCriacao);
             }
         }
 
