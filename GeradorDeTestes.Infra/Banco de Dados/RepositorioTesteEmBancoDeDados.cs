@@ -16,6 +16,7 @@ namespace GeradorDeTestes.Infra.Banco_de_Dados
     {
         RepositorioDisciplinaEmBancoDeDados repositorioDisciplina = new RepositorioDisciplinaEmBancoDeDados();
         RepositorioMateriaEmBancoDeDados repositorioMateria = new RepositorioMateriaEmBancoDeDados();
+        RepositorioQuestaoEmBancoDeDados repositorioQuestao = new RepositorioQuestaoEmBancoDeDados();
 
 
         private const string enderecoBanco =
@@ -263,11 +264,11 @@ namespace GeradorDeTestes.Infra.Banco_de_Dados
             conexaoComBanco.Open();
             SqlDataReader leitorQuestao = comandoSelecao.ExecuteReader();
 
-            //List<Categoria> categorias = new List<Categoria>();
-
             while (leitorQuestao.Read())
             {
                 var questao = ConverterParaQuestao(leitorQuestao);
+
+                repositorioQuestao.CarregarAlternativas(questao);
 
                 teste.Questoes.Add(questao);
             }
